@@ -62,10 +62,9 @@ and repeats until it has a root-cause analysis and remediation plan.
   Final diagnosis: root cause, evidence, remediation, prevention
 
 ` + colorBold + `PREREQUISITES:` + colorReset + `
-  1. Install Ollama:  https://ollama.com
-  2. Start Ollama:    ollama serve
-  3. Pull a model:    ollama pull gemma3
-  4. Run opsmate:     opsmate "why are my pods crashing in namespace myapp"
+  1. Install Ollama:  https://ollama.com  (or just run opsmate — it will guide you)
+  2. Pull a model:    ollama pull gemma4  (opsmate will offer to do this too)
+  3. Run opsmate:     opsmate "why are my pods crashing in namespace myapp"
 
 ` + colorBold + `EXAMPLES:` + colorReset + `
   # Kubernetes pod investigation
@@ -123,14 +122,14 @@ var modelsCmd = &cobra.Command{
 			name, pull, notes string
 		}{
 			{
+				"gemma4",
+				"ollama pull gemma4",
+				"Default model. Latest Gemma generation — great balance of speed and quality. ~5GB VRAM.",
+			},
+			{
 				"deepseek-r1:8b",
 				"ollama pull deepseek-r1:8b",
 				"Best reasoning. Excellent root-cause analysis. ~5GB VRAM.",
-			},
-			{
-				"gemma3",
-				"ollama pull gemma3",
-				"Good balance of speed and quality. Default model. ~5GB VRAM.",
 			},
 			{
 				"llama3.2",

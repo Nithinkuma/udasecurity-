@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -230,67 +229,7 @@ func (c *OllamaClient) Chat(messages []Message, useTools bool) (*ChatResponse, e
 	return &chatResp, nil
 }
 
-// CheckHealth verifies:
-//  1. The Ollama server is reachable at the configured endpoint
-//  2. The requested model has been pulled and is available
-//
-// We do this upfront so the user gets a clear error message immediately
-// rather than a cryptic HTTP failure after waiting for a prompt.
-func (c *OllamaClient) CheckHealth() error {
-	resp, err := c.httpClient.Get(c.endpoint + "/api/tags")
-	if err != nil {
-		return fmt.Errorf(
-			"cannot reach Ollama at %s: %w\n\n"+
-				"Troubleshooting:\n"+
-				"  1. Is Ollama installed? https://ollama.com\n"+
-				"  2. Is it running?       ollama serve\n"+
-				"  3. Wrong endpoint?      use --endpoint http://host:11434",
-			c.endpoint, err,
-		)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Ollama /api/tags returned HTTP %d", resp.StatusCode)
-	}
-
-	// Parse the model list and verify our model exists.
-	var tagsResp struct {
-		Models []struct {
-			Name string `json:"name"`
-		} `json:"models"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&tagsResp); err != nil {
-		// Server responded but we can't parse the list — proceed cautiously.
-		// This can happen with older Ollama versions that have a different schema.
-		return nil
-	}
-
-	if len(tagsResp.Models) == 0 {
-		return fmt.Errorf(
-			"no models found in Ollama.\nPull one with: ollama pull %s", c.model,
-		)
-	}
-
-	// Model matching: Ollama stores models with optional ":latest" tag.
-	// "gemma3" and "gemma3:latest" refer to the same model.
-	targetBase := strings.SplitN(c.model, ":", 2)[0]
-	for _, m := range tagsResp.Models {
-		mBase := strings.SplitN(m.Name, ":", 2)[0]
-		if m.Name == c.model || mBase == targetBase {
-			return nil // Found it.
-		}
-	}
-
-	// Build a helpful list of what IS available.
-	available := make([]string, len(tagsResp.Models))
-	for i, m := range tagsResp.Models {
-		available[i] = "  • " + m.Name
-	}
-	return fmt.Errorf(
-		"model %q not found in Ollama.\n\nAvailable models:\n%s\n\nPull it with: ollama pull %s",
-		c.model,
-		strings.Join(available, "\n"),
-		c.model,
-	)
-}
+// CheckHealth is intentionally removed.
+// All installation, server-start, and model-pull logic now lives in provision.go
+// via the Provision() function, which is called at the start of every investigation.
+// This keeps the OllamaClient focused solely on making API calls.

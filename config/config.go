@@ -73,7 +73,7 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		OllamaEndpoint: "http://localhost:11434",
-		Model:          "gemma3",
+		Model:          "gemma4",
 		AutoExecute:    false,
 		DryRun:         false,
 		MaxIterations:  20,

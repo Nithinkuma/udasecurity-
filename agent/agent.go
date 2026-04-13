@@ -167,8 +167,11 @@ func NewAgent(cfg config.Config) *Agent {
 // │   Final analysis (done)                                         │
 // └─────────────────────────────────────────────────────────────────┘
 func (a *Agent) Investigate(problem string) error {
-	// Validate the Ollama setup before anything else — friendly errors first.
-	if err := a.client.CheckHealth(); err != nil {
+	// Provision checks and auto-resolves three things before starting:
+	// 1. ollama binary installed?  → offer to install
+	// 2. ollama server running?    → offer to start
+	// 3. model pulled?             → offer to pull
+	if err := Provision(a.cfg.OllamaEndpoint, a.cfg.Model); err != nil {
 		return err
 	}
 
