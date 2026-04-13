@@ -1,0 +1,9 @@
+# Compiled binary
+opsmate
+
+# Go build cache
+*.test
+*.out
+
+# OS artifacts
+.DS_Store
